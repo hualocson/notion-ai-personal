@@ -1,14 +1,14 @@
 import { ACCOUNT_ID } from "@/constants/notion";
 
 const ACCOUNT_STYLE = {
-  [ACCOUNT_ID.BADMINTON]: "#f87171",
+  [ACCOUNT_ID.BADMINTON]: "#C7B7A3",
   [ACCOUNT_ID.FUND_FOOD]: "#c084fc",
-  [ACCOUNT_ID.KINDLE]: "#bae6fd",
+  [ACCOUNT_ID.KINDLE]: "#B3C8CF",
 
-  [ACCOUNT_ID.BIDV]: "#4ade80",
-  [ACCOUNT_ID.MOMO]: "#f472b6",
-  [ACCOUNT_ID.CASH]: "#818cf8",
-  [ACCOUNT_ID.GP]: "#fbbf24",
+  [ACCOUNT_ID.BIDV]: "#B1C29E",
+  [ACCOUNT_ID.MOMO]: "#E1ACAC",
+  [ACCOUNT_ID.CASH]: "#659287",
+  [ACCOUNT_ID.GP]: "#DEAA79",
 } as const;
 
 export default ACCOUNT_STYLE;
