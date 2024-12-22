@@ -61,6 +61,28 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      keyframes: {
+        rotate: {
+          "50%": {
+            transform: "scale(1.1) rotate(360deg)",
+          },
+          "100%": {
+            transform: "scale(1) rotate(720deg)",
+          },
+        },
+        rotate_rev: {
+          "50%": {
+            transform: "scale(1.2) rotate(-360deg)",
+          },
+          "100%": {
+            transform: "scale(1) rotate(-720deg)",
+          },
+        },
+      },
+      animation: {
+        rotate: "rotate 3.5s linear infinite",
+        rotate_rev: "rotate_rev 3.5s linear infinite",
+      },
     },
   },
   plugins: [animate],
