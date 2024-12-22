@@ -17,6 +17,7 @@ export default [
       },
     },
     rules: {
+      "@typescript-eslint/ban-ts-comment": "off",
       quotes: [
         "error",
         "double",

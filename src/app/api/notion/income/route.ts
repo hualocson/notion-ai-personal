@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { env } from "@/app/env";
 import { TABLE_ID } from "@/constants/notion";
 import getAccountId from "@/lib/get-account-id";
 import { Client } from "@notionhq/client";
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
   const body = (await request.json()) as ITransaction;
 
   try {
-    const notion = new Client({ auth: process.env.NOTION_TOKEN });
+    const notion = new Client({ auth: env.NOTION_TOKEN });
     const notionBody = buildCreateIncomeBody({ ...body });
 
     const res = await notion.pages.create(notionBody);

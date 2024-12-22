@@ -12,3 +12,11 @@ interface ITransfer {
   fromAccount: string;
   toAccount: string;
 }
+
+interface IGeminiOutput {
+  name: string;
+  amount: number;
+  date: string | null;
+  fromAccount: string;
+  toAccount: string | null;
+}

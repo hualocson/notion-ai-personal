@@ -73,6 +73,25 @@ body {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply relative min-h-dvh bg-gradient-to-b from-white from-30% to-[#FEF9F2] text-foreground;
+  }
+}
+
+@layer components {
+  .ai-sphere-box {
+    position: absolute;
+    display: block;
+    border-radius: 50%;
+    box-shadow:
+      0 -10px 0 0 rgba(208, 232, 197, 0.9),
+      -7.5px 5px 0 0 rgba(255, 230, 169, 0.6),
+      7.5px 5px 0 0 rgba(101, 146, 135, 0.9);
+  }
+
+  .ai-sphere-box:nth-child(2) {
+    box-shadow:
+      7.5px -5px 0 0 rgba(179, 200, 207, 0.6),
+      -7.5px -5px 0 0 rgba(190, 215, 220, 0.6),
+      0 10px 0 0 rgba(255, 227, 227, 0.6);
   }
 }
