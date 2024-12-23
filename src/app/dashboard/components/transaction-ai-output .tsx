@@ -21,6 +21,7 @@ import ACCOUNT_STYLE from "./account-style";
 
 interface IProcessedPromptProps {
   data: IGeminiOutput;
+  onAddPageSuccess: (url: string) => void;
 }
 
 const ROUTE = {
@@ -29,7 +30,10 @@ const ROUTE = {
   INCOME: "/api/notion/income",
 } as const;
 
-const TransactionAIOutput: FC<IProcessedPromptProps> = ({ data }) => {
+const TransactionAIOutput: FC<IProcessedPromptProps> = ({
+  data,
+  onAddPageSuccess,
+}) => {
   const { name, date, amount, fromAccount, toAccount } = data;
 
   const queryClient = useQueryClient();
@@ -41,22 +45,114 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({ data }) => {
       url: string;
       data: IGeminiOutput | ITransaction;
     }) =>
-      axios.post<{ status: string; id: string }>(url, {
+      axios.post<{ status: string; id: string; url: string }>(url, {
         ...data,
       }),
     onSuccess: (res) => {
-      toast.success(res.data.id);
-      toast.promise(
-        queryClient.invalidateQueries({
-          queryKey: ["accounts"],
-          exact: true,
-        }),
-        {
-          loading: "Refreshing accounts...",
-          success: "Accounts refreshed!",
-          error: "Failed to refresh accounts",
+      toast.success("Transaction added successfully: " + res.data.url);
+      onAddPageSuccess(res.data.url);
+    },
+    onMutate: async (updatedItem) => {
+      const queryKey = ["accounts"];
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey });
+
+      const { data, url } = updatedItem;
+      const amount = data.amount;
+      let updatedAccounts: Array<{
+        accountId: string;
+        amount: number;
+      }>;
+      let message = "";
+
+      if (url === ROUTE.TRANSFER) {
+        const fromAccount = (data as IGeminiOutput).fromAccount;
+        const toAccount = (data as IGeminiOutput).toAccount;
+        if (toAccount) {
+          updatedAccounts = [
+            {
+              accountId: getAccountId(fromAccount),
+              amount: -amount,
+            },
+            {
+              accountId: getAccountId(toAccount),
+              amount,
+            },
+          ];
+
+          message = `Transfer ${amount} from ${fromAccount} to ${toAccount}`;
         }
+      } else if (url === ROUTE.EXPENSE) {
+        const account = (data as ITransaction).account;
+        updatedAccounts = [
+          {
+            accountId: getAccountId(account),
+            amount: -amount,
+          },
+        ];
+        message = `Expense ${amount} from ${account}`;
+      } else {
+        const account = (data as ITransaction).account;
+        updatedAccounts = [
+          {
+            accountId: getAccountId(account),
+            amount,
+          },
+        ];
+
+        message = `Income ${amount} to ${account}`;
+      }
+
+      // Snapshot the previous value
+      const previousItems = queryClient.getQueryData<
+        unknown,
+        string[],
+        {
+          message: string;
+          data: Array<{ account: string; accountId: string; balance: number }>;
+        }
+      >(queryKey);
+      toast.info(message);
+
+      // Optimistically update the cache
+      queryClient.setQueryData(
+        queryKey,
+        (oldItems: {
+          message: string;
+          data: Array<{ account: string; accountId: string; balance: number }>;
+        }) => ({
+          message: oldItems.message,
+          data: oldItems.data.map((item) => {
+            const updatedAccount = updatedAccounts.find(
+              (acc) => acc.accountId === item.accountId
+            );
+            if (updatedAccount) {
+              return {
+                ...item,
+                balance: item.balance + updatedAccount.amount,
+              };
+            }
+            return item;
+          }),
+        })
       );
+
+      return { previousItems };
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["accounts"],
+      });
+    },
+    onError: (err, updatedItem, context) => {
+      // Rollback on error
+
+      console.log({ err, updatedItem, context });
+      toast.error("Transaction failed. Rollback initiated");
+
+      if (context) {
+        queryClient.setQueryData(["accounts"], context.previousItems);
+      }
     },
   });
 
