@@ -149,6 +149,12 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
         queryClient.setQueryData(["accounts"], context.previousItems);
       }
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["accounts"],
+        refetchType: "all",
+      });
+    },
   });
 
   const onAddTransfer = () => {

@@ -19,6 +19,7 @@ const DashboardContentLayout = ({
   const handleOnRefresh = () => {
     queryClient.invalidateQueries({
       queryKey: ["accounts"],
+      refetchType: "all",
     });
   };
 
