@@ -4,6 +4,7 @@ import { env } from "@/app/env";
 import { TABLE_ID } from "@/constants/notion";
 import getAccountId from "@/lib/get-account-id";
 import { Client } from "@notionhq/client";
+import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 
 const buildCreateExpenseBody = ({
   name,
@@ -46,10 +47,11 @@ export async function POST(request: NextRequest) {
     const notion = new Client({ auth: env.NOTION_TOKEN });
     const notionBody = buildCreateExpenseBody({ ...body });
 
-    const res = await notion.pages.create(notionBody);
+    const res = (await notion.pages.create(notionBody)) as PageObjectResponse;
     return NextResponse.json({
       status: "success",
       id: res.id,
+      url: res.url,
     });
   } catch (error) {
     console.error(error);
