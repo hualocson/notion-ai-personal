@@ -46,11 +46,17 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({ data }) => {
       }),
     onSuccess: (res) => {
       toast.success(res.data.id);
-      queryClient.invalidateQueries({
-        queryKey: ["accounts"],
-      });
-      // setOutput(undefined);
-      // setPrompt(undefined);
+      toast.promise(
+        queryClient.invalidateQueries({
+          queryKey: ["accounts"],
+          exact: true,
+        }),
+        {
+          loading: "Refreshing accounts...",
+          success: "Accounts refreshed!",
+          error: "Failed to refresh accounts",
+        }
+      );
     },
   });
 

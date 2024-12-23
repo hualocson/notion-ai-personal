@@ -17,7 +17,7 @@ import MagicInput from "./components/magic-input";
 import TransactionAIOutput from "./components/transaction-ai-output ";
 
 const Dashboard = () => {
-  const { data, isPending } = useQuery({
+  const { data, isPending, isFetching } = useQuery({
     queryKey: ["accounts"],
     queryFn: () =>
       axios
@@ -56,15 +56,18 @@ const Dashboard = () => {
     aiCallMutation.mutate(inputValue.trim());
   };
 
+  const accounts = data?.data ?? [];
+
   return (
     <DashboardContentLayout headerText="Dashboard">
-      {isPending ? (
+      {isPending || isFetching ? (
         <div className="inline-flex size-full min-h-[118px] items-center justify-center">
           <Loader2 className="size-4 animate-spin" />
         </div>
       ) : (
         <div className="container">
-          <AccountCarousel data={data?.data ?? []} />
+          <AccountCarousel data={accounts} />
+          {/* <AccountListing data={data?.data ?? []} /> */}
         </div>
       )}
 
