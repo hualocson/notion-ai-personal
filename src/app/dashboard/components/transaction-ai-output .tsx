@@ -139,11 +139,6 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
 
       return { previousItems };
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["accounts"],
-      });
-    },
     onError: (err, updatedItem, context) => {
       // Rollback on error
 
