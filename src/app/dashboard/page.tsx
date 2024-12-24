@@ -19,15 +19,14 @@ import MagicInput from "./components/magic-input";
 import TransactionAIOutput from "./components/transaction-ai-output ";
 
 const Dashboard = () => {
-  const { data, isPending } = useQuery({
+  const { data, isPending, isSuccess } = useQuery({
     queryKey: ["accounts"],
     queryFn: () =>
-      axios
-        .get<{
-          message: string;
-          data: Array<{ account: string; accountId: string; balance: number }>;
-        }>("/api/notion/account")
-        .then((res) => res.data),
+      axios.get<{
+        message: string;
+        data: Array<{ account: string; accountId: string; balance: number }>;
+      }>("/api/notion/account"),
+    select: (data) => data.data,
   });
 
   const [promptData, setPromptData] = useState<{
@@ -64,8 +63,6 @@ const Dashboard = () => {
     aiCallMutation.mutate(inputValue.trim());
   };
 
-  const accounts = data?.data ?? [];
-
   const onAddPageSuccess = (url: string) => {
     setPromptData((prev) => ({ ...prev, url }));
   };
@@ -78,7 +75,7 @@ const Dashboard = () => {
         </div>
       ) : (
         <div className="container">
-          <AccountCarousel data={accounts} />
+          {isSuccess && <AccountCarousel data={data.data} />}
         </div>
       )}
 
