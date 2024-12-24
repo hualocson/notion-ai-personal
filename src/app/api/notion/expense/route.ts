@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { env } from "@/app/env";
+import notion from "@/app/configs/notion";
 import { TABLE_ID } from "@/constants/notion";
 import getAccountId from "@/lib/get-account-id";
-import { Client } from "@notionhq/client";
 import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 
 const buildCreateExpenseBody = ({
@@ -44,7 +43,6 @@ export async function POST(request: NextRequest) {
   const body = (await request.json()) as ITransaction;
 
   try {
-    const notion = new Client({ auth: env.NOTION_TOKEN });
     const notionBody = buildCreateExpenseBody({ ...body });
 
     const res = (await notion.pages.create(notionBody)) as PageObjectResponse;
