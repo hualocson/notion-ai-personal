@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
 
-import { env } from "@/app/env";
+import notion from "@/app/configs/notion";
 import { TABLE_ID } from "@/constants/notion";
 import NOTION_ACCOUNT_MAP from "@/constants/notion-account-map";
-import { Client } from "@notionhq/client";
 import { type DatabaseObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 
 // get all account
 export async function GET() {
-  const notion = new Client({ auth: env.NOTION_TOKEN });
   // query database account return amount and account name
   const data = await notion.databases.query({
     database_id: TABLE_ID.ACCOUNTS,
