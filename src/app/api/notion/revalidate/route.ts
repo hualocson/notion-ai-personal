@@ -1,10 +1,11 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { revalidatePath } from "next/cache";
+import { NextResponse } from "next/server";
 
-export async function POST(_: NextApiRequest, res: NextApiResponse) {
+export async function POST() {
   try {
-    await res.revalidate("/dashboard");
-    return res.json({ revalidated: true });
+    revalidatePath("/dashboard");
+    return NextResponse.json({ status: "success" });
   } catch (err) {
-    return res.status(500).send("Error revalidating");
+    return NextResponse.json({ status: "error" });
   }
 }
