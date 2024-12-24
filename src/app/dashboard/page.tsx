@@ -18,8 +18,9 @@ import DashboardContentLayout from "./components/dashboard-content-layout";
 import MagicInput from "./components/magic-input";
 import TransactionAIOutput from "./components/transaction-ai-output ";
 
-const fetchAccounts = async () =>
-  axios
+const fetchAccounts = async () => {
+  await axios.post("/api/notion/revalidate");
+  return axios
     .get<{
       message: string;
       data: {
@@ -36,6 +37,7 @@ const fetchAccounts = async () =>
         data: [],
       };
     });
+};
 
 const Dashboard = () => {
   const { data, isPending, isSuccess } = useQuery({

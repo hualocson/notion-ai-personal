@@ -38,13 +38,6 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
 
   const queryClient = useQueryClient();
 
-  const revalidateMutation = useMutation({
-    mutationFn: () => axios.post("/api/notion/revalidate"),
-    onSuccess: () => {
-      toast.success("Revalidated");
-    },
-  });
-
   const addNewPageMutation = useMutation({
     mutationFn: ({
       data,
@@ -158,11 +151,10 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
       }
     },
     onSettled: () => {
-      revalidateMutation.mutate();
-      // queryClient.invalidateQueries({
-      //   queryKey: ["accounts"],
-      //   refetchType: "all",
-      // });
+      queryClient.invalidateQueries({
+        queryKey: ["accounts"],
+        refetchType: "all",
+      });
     },
   });
 
