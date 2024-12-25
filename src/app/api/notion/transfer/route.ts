@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import notion from "@/app/configs/notion";
 import { TABLE_ID } from "@/constants/notion";
 import getAccountId from "@/lib/get-account-id";
-import { Client } from "@notionhq/client";
-import { CreatePageParameters } from "@notionhq/client/build/src/api-endpoints";
+import {
+  CreatePageParameters,
+  PageObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints";
 
 const buildCreateTransferBody = ({
   name,
@@ -48,13 +51,13 @@ export async function POST(request: NextRequest) {
   const body = (await request.json()) as ITransfer;
 
   try {
-    const notion = new Client({ auth: process.env.NOTION_TOKEN });
     const notionBody = buildCreateTransferBody({ ...body });
 
-    const res = await notion.pages.create(notionBody);
+    const res = (await notion.pages.create(notionBody)) as PageObjectResponse;
     return NextResponse.json({
       status: "success",
       id: res.id,
+      url: res.url,
     });
   } catch (error) {
     console.error(error);

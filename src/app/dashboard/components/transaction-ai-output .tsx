@@ -37,6 +37,7 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
   const { name, date, amount, fromAccount, toAccount } = data;
 
   const queryClient = useQueryClient();
+
   const addNewPageMutation = useMutation({
     mutationFn: ({
       data,

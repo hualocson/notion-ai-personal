@@ -18,15 +18,31 @@ import DashboardContentLayout from "./components/dashboard-content-layout";
 import MagicInput from "./components/magic-input";
 import TransactionAIOutput from "./components/transaction-ai-output ";
 
+const fetchAccounts = async () => {
+  await axios.post("/api/notion/revalidate");
+  return axios
+    .get<{
+      message: string;
+      data: {
+        account: string;
+        accountId: string;
+        balance: number;
+      }[];
+    }>("/api/notion/account")
+    .then((res) => res.data)
+    .catch((error) => {
+      console.error(error);
+      return {
+        message: "Error fetching data",
+        data: [],
+      };
+    });
+};
+
 const Dashboard = () => {
   const { data, isPending, isSuccess } = useQuery({
     queryKey: ["accounts"],
-    queryFn: () =>
-      axios.get<{
-        message: string;
-        data: Array<{ account: string; accountId: string; balance: number }>;
-      }>("/api/notion/account"),
-    select: (data) => data.data,
+    queryFn: () => fetchAccounts(),
   });
 
   const [promptData, setPromptData] = useState<{
