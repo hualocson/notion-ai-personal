@@ -12,19 +12,29 @@ import AIIndicator from "./ai-indicator";
 
 interface IMagicInputProps {
   onSubmit?: (inputValue: string) => void;
+  focusInput: boolean;
+  setFocusInput: (focus: boolean) => void;
+  defaultValue?: string;
 }
 
-const MagicInput: FC<IMagicInputProps> = ({ onSubmit }) => {
+const MagicInput: FC<IMagicInputProps> = ({
+  onSubmit,
+  focusInput,
+  setFocusInput,
+  defaultValue,
+}) => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [inputValue, setInputValue] = useState<string>("");
-  const [focusInput, setFocusInput] = useState<boolean>(false);
 
-  const handleFocusInput = () => {
-    setFocusInput(true);
+  const onFocusInput = () => {
     const input = inputRef.current;
 
     input?.focus();
   };
+
+  useEffect(() => {
+    setInputValue(defaultValue ?? "");
+  }, [defaultValue]);
 
   useEffect(() => {
     const handleFocus = () => setFocusInput(true);
@@ -44,6 +54,20 @@ const MagicInput: FC<IMagicInputProps> = ({ onSubmit }) => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (focusInput) {
+      onFocusInput();
+    }
+  }, [focusInput]);
+
+  const handleOnKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      onSubmit?.(inputValue);
+      setInputValue("");
+    }
+  };
 
   return (
     <>
@@ -75,6 +99,7 @@ const MagicInput: FC<IMagicInputProps> = ({ onSubmit }) => {
           )}
           value={inputValue}
           placeholder="Enter prompt"
+          onKeyDown={handleOnKeyDown}
         />
 
         <Button
@@ -103,7 +128,7 @@ const MagicInput: FC<IMagicInputProps> = ({ onSubmit }) => {
             "left-1 top-[calc(100%-8px)] -translate-y-full translate-x-0"
         )}
       >
-        <AIIndicator onClick={handleFocusInput} />
+        <AIIndicator onClick={() => setFocusInput(true)} />
       </div>
     </>
   );

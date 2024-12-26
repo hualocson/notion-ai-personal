@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { Link2, Loader2, RotateCcw } from "lucide-react";
+import { Link2, Loader2, PencilLine, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -40,6 +40,15 @@ const fetchAccounts = async () => {
 };
 
 const Dashboard = () => {
+  const [focusInput, setFocusInput] = useState<boolean>(false);
+  const [inputValue, setInputValue] = useState<string>("");
+
+  useEffect(() => {
+    if (!focusInput) {
+      setInputValue("");
+    }
+  }, [focusInput]);
+
   const { data, isPending, isSuccess } = useQuery({
     queryKey: ["accounts"],
     queryFn: () => fetchAccounts(),
@@ -115,13 +124,31 @@ const Dashboard = () => {
                 <AIIndicator className="ml-4 size-6" />
               )}
               {promptData.prompt && !aiCallMutation.isPending && (
-                <Button
-                  size={"icon"}
-                  className="size-8 bg-amber-300/10 text-amber-600 hover:bg-amber-300/40 [&_svg]:size-4"
-                  onClick={() => handleOnCallAI(promptData.prompt!)}
-                >
-                  <RotateCcw />
-                </Button>
+                <>
+                  <Button
+                    size={"icon"}
+                    className="size-8 bg-amber-300/10 text-amber-600 hover:bg-amber-300/40 [&_svg]:size-4"
+                    onClick={() =>
+                      setFocusInput((prev) => {
+                        if (prev) {
+                          return false;
+                        } else {
+                          setInputValue(promptData.prompt!);
+                          return true;
+                        }
+                      })
+                    }
+                  >
+                    <PencilLine />
+                  </Button>
+                  <Button
+                    size={"icon"}
+                    className="size-8 bg-amber-300/10 text-amber-600 hover:bg-amber-300/40 [&_svg]:size-4"
+                    onClick={() => handleOnCallAI(promptData.prompt!)}
+                  >
+                    <RotateCcw />
+                  </Button>
+                </>
               )}
             </div>
           </div>
@@ -135,7 +162,12 @@ const Dashboard = () => {
       </div>
 
       <div className="fixed inset-x-6 bottom-12 mx-auto max-w-screen-sm">
-        <MagicInput onSubmit={handleOnCallAI} />
+        <MagicInput
+          onSubmit={handleOnCallAI}
+          setFocusInput={setFocusInput}
+          focusInput={focusInput}
+          defaultValue={inputValue}
+        />
       </div>
     </DashboardContentLayout>
   );
