@@ -1,11 +1,14 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useState } from "react";
 
 import formatAmount from "@/lib/format-amount";
 import getAccountId from "@/lib/get-account-id";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import dayjs from "dayjs";
+import isToday from "dayjs/plugin/isToday";
+import relativeTime from "dayjs/plugin/relativeTime";
 import {
   ArrowLeftRight,
   ArrowRight,
@@ -18,6 +21,10 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 import ACCOUNT_STYLE from "./account-style";
+import TransactionDrawer from "./transaction-drawer";
+
+dayjs.extend(relativeTime);
+dayjs.extend(isToday);
 
 interface IProcessedPromptProps {
   data: IGeminiOutput;
@@ -34,7 +41,9 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
   data,
   onAddPageSuccess,
 }) => {
-  const { name, date, amount, fromAccount, toAccount } = data;
+  const [processedData, setProcessedData] = useState<IGeminiOutput | null>(
+    data
+  );
 
   const queryClient = useQueryClient();
 
@@ -50,7 +59,8 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
         ...data,
       }),
     onSuccess: (res) => {
-      toast.success("Transaction added successfully: " + res.data.url);
+      toast.success("Transaction added successfully");
+      setProcessedData(null);
       onAddPageSuccess(res.data.url);
     },
     onMutate: async (updatedItem) => {
@@ -189,6 +199,10 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
     });
   };
 
+  if (!processedData) return null;
+
+  const { fromAccount, toAccount, amount, name, date } = processedData;
+
   return (
     <div
       style={
@@ -224,13 +238,16 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
         {/* display amount, date and button */}
         <div className="flex w-full items-center justify-between rounded-2xl bg-card p-4 pb-8 ring-1 ring-gray-300/10 backdrop-blur-md">
           <span className="text-2xl font-bold">{formatAmount(amount)}</span>
-          <span className="text-gray-400">{date}</span>
+          <span className="text-gray-400">
+            {date}
+            {` (${dayjs(date).isToday() ? "today" : dayjs(date).fromNow(false)})`}
+          </span>
         </div>
         <div className="absolute bottom-1 flex translate-y-1/2 items-center gap-2 rounded-xl bg-card p-2 shadow">
           <Button
             size={"icon"}
-            className="rounded-full bg-[#FF8A8A1a] text-[#FF8A8A] duration-500 hover:bg-[#FF8A8A40]"
-            disabled={addNewPageMutation.isPending}
+            className="rounded-full bg-[#FF8A8A1a] text-[#FF8A8A] duration-500 hover:bg-[#FF8A8A40] disabled:bg-slate-400 disabled:text-slate-800 disabled:opacity-40"
+            disabled={!!processedData.toAccount || addNewPageMutation.isPending}
             onClick={onAddExpense}
           >
             {addNewPageMutation.isPending ? (
@@ -241,8 +258,8 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
           </Button>
           <Button
             size={"icon"}
-            className="rounded-full bg-[#B1C29E1a] text-[#B1C29E] duration-500 hover:bg-[#B1C29E40]"
-            disabled={addNewPageMutation.isPending}
+            className="rounded-full bg-[#B1C29E1a] text-[#B1C29E] duration-500 hover:bg-[#B1C29E40] disabled:bg-slate-400 disabled:text-slate-800 disabled:opacity-40"
+            disabled={!!processedData.toAccount || addNewPageMutation.isPending}
             onClick={onAddIncome}
           >
             {addNewPageMutation.isPending ? (
@@ -253,8 +270,8 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
           </Button>
           <Button
             size={"icon"}
-            className="rounded-full bg-[#DEAA791a] text-[#DEAA79] duration-500 hover:bg-[#DEAA7940]"
-            disabled={!data.toAccount || addNewPageMutation.isPending}
+            className="rounded-full bg-[#DEAA791a] text-[#DEAA79] duration-500 hover:bg-[#DEAA7940] disabled:bg-slate-400 disabled:text-slate-800 disabled:opacity-40"
+            disabled={!processedData.toAccount || addNewPageMutation.isPending}
             onClick={onAddTransfer}
           >
             {addNewPageMutation.isPending ? (
@@ -263,6 +280,24 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
               <ArrowLeftRight />
             )}
           </Button>
+          <TransactionDrawer
+            initData={{
+              fromAccount: fromAccount,
+              toAccount: toAccount ?? "null",
+              amount: amount,
+              name: name,
+              date: dayjs(date).toDate(),
+            }}
+            onSubmit={(data) => {
+              setProcessedData({
+                name: data.name,
+                amount: data.amount,
+                fromAccount: data.fromAccount,
+                toAccount: data.toAccount === "null" ? null : data.toAccount,
+                date: dayjs(data.date).format("YYYY-MM-DD"),
+              });
+            }}
+          />
         </div>
       </div>
     </div>
