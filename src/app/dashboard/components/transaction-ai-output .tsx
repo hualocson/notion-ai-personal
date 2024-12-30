@@ -168,14 +168,14 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
     },
   });
 
-  const onAddTransfer = () => {
+  const onAddTransfer = (data: IGeminiOutput) => {
     addNewPageMutation.mutate({
       data,
       url: ROUTE.TRANSFER,
     });
   };
 
-  const onAddExpense = () => {
+  const onAddExpense = (data: IGeminiOutput) => {
     addNewPageMutation.mutate({
       data: {
         amount: data.amount,
@@ -187,7 +187,7 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
     });
   };
 
-  const onAddIncome = () => {
+  const onAddIncome = (data: IGeminiOutput) => {
     addNewPageMutation.mutate({
       data: {
         amount: data.amount,
@@ -248,7 +248,11 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
             size={"icon"}
             className="rounded-full bg-[#FF8A8A1a] text-[#FF8A8A] duration-500 hover:bg-[#FF8A8A40] disabled:bg-slate-400 disabled:text-slate-800 disabled:opacity-40"
             disabled={!!processedData.toAccount || addNewPageMutation.isPending}
-            onClick={onAddExpense}
+            onClick={() => {
+              if (processedData) {
+                onAddExpense(processedData);
+              }
+            }}
           >
             {addNewPageMutation.isPending ? (
               <Loader2 className="size-4 animate-spin text-gray-500" />
@@ -260,7 +264,11 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
             size={"icon"}
             className="rounded-full bg-[#B1C29E1a] text-[#B1C29E] duration-500 hover:bg-[#B1C29E40] disabled:bg-slate-400 disabled:text-slate-800 disabled:opacity-40"
             disabled={!!processedData.toAccount || addNewPageMutation.isPending}
-            onClick={onAddIncome}
+            onClick={() => {
+              if (processedData) {
+                onAddIncome(processedData);
+              }
+            }}
           >
             {addNewPageMutation.isPending ? (
               <Loader2 className="size-4 animate-spin text-gray-500" />
@@ -272,7 +280,11 @@ const TransactionAIOutput: FC<IProcessedPromptProps> = ({
             size={"icon"}
             className="rounded-full bg-[#DEAA791a] text-[#DEAA79] duration-500 hover:bg-[#DEAA7940] disabled:bg-slate-400 disabled:text-slate-800 disabled:opacity-40"
             disabled={!processedData.toAccount || addNewPageMutation.isPending}
-            onClick={onAddTransfer}
+            onClick={() => {
+              if (processedData) {
+                onAddTransfer(processedData);
+              }
+            }}
           >
             {addNewPageMutation.isPending ? (
               <Loader2 className="size-4 animate-spin text-gray-500" />
